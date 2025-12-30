@@ -1,0 +1,72 @@
+#include <iostream>
+#include <map>
+#include <vector>
+#include <chrono>
+#include <thread>
+
+using namespace std;
+
+// Structure representing a system call
+struct SystemCall {
+    string name;
+    int baseLatency; // milliseconds
+};
+
+// AI Optimizer class
+class AISystemCallOptimizer {
+private:
+    map<string, int> callFrequency;
+
+public:
+    // Learn from system call usage
+    void learn(const string& callName) {
+        callFrequency[callName]++;
+    }
+
+    // Predict optimized latency
+    int optimizedLatency(const SystemCall& call) {
+        int freq = callFrequency[call.name];
+
+        // AI heuristic: reduce latency for frequent calls
+        if (freq >= 5)
+            return call.baseLatency / 2;
+        else if (freq >= 3)
+            return call.baseLatency * 0.7;
+        else
+            return call.baseLatency;
+    }
+};
+
+// Simulate system call execution
+void executeSystemCall(SystemCall call, AISystemCallOptimizer& ai) {
+    ai.learn(call.name);
+
+    int latency = ai.optimizedLatency(call);
+
+    cout << "Executing " << call.name
+         << " | Optimized Latency: " << latency << " ms" << endl;
+
+    this_thread::sleep_for(chrono::milliseconds(latency));
+}
+
+int main() {
+    AISystemCallOptimizer ai;
+
+    vector<SystemCall> systemCalls = {
+        {"read()", 120},
+        {"write()", 150},
+        {"open()", 200},
+        {"close()", 100}
+    };
+
+    // Simulate workload
+    for (int i = 0; i < 10; i++) {
+        executeSystemCall(systemCalls[i % 2], ai); // frequent calls
+        executeSystemCall(systemCalls[2], ai);     // less frequent
+    }
+
+    cout << "\nAI-based System Call Optimization Completed.\n";
+    return 0;
+}
+
+
